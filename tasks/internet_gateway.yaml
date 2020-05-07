@@ -1,0 +1,11 @@
+- name: "AWS VPC {{ aws_vpc_create.action }} ({{ aws_vpc_create.name }}) // Internet gateway"
+  ec2_vpc_igw:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    tags: "{{ aws_vpc_create.tags }}"
+    state: "present"
+  register: created_igw
+
+- set_fact:
+    internet_gateway: "{{ created_igw }}"

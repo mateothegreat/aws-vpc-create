@@ -1,0 +1,20 @@
+- name: "Elastic ip for NAT gateway"
+  ec2_eip:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    state: "present"
+  register: created_eip
+  when: aws_vpc_create.nat_gateway | bool
+
+- set_fact:
+    nat_gateway_elastic_ip: "{{ created_eip.public_ip }}"
+  when: aws_vpc_create.nat_gateway | bool
+
+- name: "Tag elastic ip for NAT gateway"
+  ec2_tag:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    resource: "{{ created_eip.allocation_id }}"
+    state: "present"
+    tags: "{{ aws_vpc_create.tags | combine({ 'Name': aws_vpc_create.name + '-nat-gateway' }) }}"
+  when: aws_vpc_create.nat_gateway | bool

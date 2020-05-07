@@ -1,0 +1,21 @@
+- name: "Create peering connection"
+  ec2_vpc_peer:
+    region: "{{ item.region }}"
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    peer_vpc_id: "{{ item.vpc_id }}"
+    state: "present"
+    tags: "{{ aws_vpc_create.tags | combine({ 'Name': item.name }) }}"
+  register: vpc_peers
+  loop: "{{ aws_vpc_create.peering }}"
+  when: aws_vpc_create.peering is defined
+
+- set_fact:
+    vpc_peering_connections: "{{ vpc_peers }}"
+
+- name: "Accept peering connection"
+  ec2_vpc_peer:
+    region: "{{ aws_vpc_create.region }}"
+    peering_id: "{{ item.peering_id }}"
+    state: "accept"
+  loop: "{{ vpc_peers.results }}"
+  when: aws_vpc_create.peering is defined

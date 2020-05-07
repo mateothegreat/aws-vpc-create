@@ -1,0 +1,29 @@
+- set_fact:
+    public_subnet_id: "{{ item.id }}"
+  when: item.tags.type == 'public'
+  loop: "{{ subnets }}"
+
+- name: "Create NAT gateway (only if a public subnet is present + will reuse any existing)"
+  ec2_vpc_nat_gateway:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    subnet_id: "{{ public_subnet_id }}"
+    eip_address: "{{ nat_gateway_elastic_ip }}"
+    if_exist_do_not_create: "yes"
+    state: present
+    wait: yes
+    wait_timeout: "900"
+  register: created_nat
+  when: aws_vpc_create.nat_gateway | bool
+
+- set_fact:
+    nat_gateway: "{{ created_nat }}"
+
+- name: "Tag NAT gateway"
+  ec2_tag:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    resource: "{{ created_nat.nat_gateway_id }}"
+    state: present
+    tags: "{{ aws_vpc_create.tags | combine({ 'Name': aws_vpc_create.name + '-nat-gateway' }) }}"
+  when: aws_vpc_create.nat_gateway | bool

@@ -1,0 +1,3 @@
+- name: "Create subnets"
+  include_tasks: "subnet.yaml"
+  loop: "{{ aws_vpc_create.subnets }}"

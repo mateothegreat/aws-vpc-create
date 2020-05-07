@@ -1,0 +1,53 @@
+- name: "Create public route table"
+  include_tasks: "route_table.yaml"
+  vars:
+    type: "public"
+    subnets: "{{ aws_vpc_create.subnets | selectattr('type', 'equalto', 'public') | list }}"
+    routes:
+      - dest: "0.0.0.0/0"
+        gateway_id: "{{ internet_gateway.gateway_id }}"
+- debug: var=nat_gateway
+
+#- set_fact:
+#    private_routes:
+#      - dest: "0.0.0.0/0"
+#        gateway_id: "{{ nat_gateway.nat_gateway_id }}"
+#  when: aws_vpc_create.nat_gateway | bool
+
+- debug: var=vpc_peering_connections
+
+- set_fact:
+    private_routes: "{{ (private_routes | default([])) + [{ 'dest': item.item.cidr, 'vpc_peering_connection_id': item.peering_id }] }}"
+    #  when: aws_vpc_create.nat_gateway | bool
+  loop: "{{ vpc_peering_connections.results }}"
+
+- name: "Query for default (main) route table"
+  ec2_vpc_route_table_info:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    filters:
+      vpc-id: "{{ created_vpc.vpc.id }}"
+      association.main: "true"
+  register: default_route_table
+- debug: var=default_route_table
+
+- name: "Tag default (main) route table to be private"
+  ec2_vpc_route_table:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    lookup: "id"
+    purge_routes: "no"
+    purge_subnets: "no"
+    purge_tags: "no"
+    route_table_id: "{{ default_route_table.route_tables[0].id }}"
+    tags: "{{ aws_vpc_create.tags | combine({ 'Name': aws_vpc_create.name + '-private', 'type': 'private' }) }}"
+    state: present
+
+- name: "Update default route table to include private routes"
+  include_tasks: "route_table.yaml"
+  vars:
+    type: "private"
+    subnets: "{{ aws_vpc_create.subnets | selectattr('type', 'equalto', 'private') | list }}"
+    routes: "{{ private_routes }}"
+    route_table_id: "{{ default_route_table.route_tables[0].id }}"

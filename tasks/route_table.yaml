@@ -1,0 +1,10 @@
+- name: "Create route table ({{ aws_vpc_create.name + '-' + type }})"
+  ec2_vpc_route_table:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    route_table_id: "{{ route_table_id | default(omit) }}"
+    tags: "{{ aws_vpc_create.tags | combine({ 'Name': aws_vpc_create.name + '-' + type }) }}"
+    subnets: "{{ subnets | map(attribute='name') | list }}"
+    routes: "{{ routes }}"
+    state: "present"

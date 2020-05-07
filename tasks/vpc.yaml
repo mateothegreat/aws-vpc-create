@@ -1,0 +1,27 @@
+- name: "AWS VPC create ({{ aws_vpc_create.name }}) // Check for existing"
+  ec2_vpc_net_info:
+    profile: "{{ aws_vpc_create.profile }}"
+    region: "{{ aws_vpc_create.region }}"
+    filters:
+      "tag:Name": "{{ aws_vpc_create.name }}"
+  register: vpc_info
+  when: not aws_vpc_create.allow_duplicate_name | bool
+
+- name: "AWS VPC create ({{ aws_vpc_create.name }}) // Check for existing & fail if it exists"
+  fail:
+    msg: "The AWS VPC {{ aws_vpc_create.name }} already exists! Delete it first if you want to re-create this stack."
+  when: not aws_vpc_create.allow_duplicate_name | bool and vpc_info.vpcs | length > 0
+
+- name: "AWS VPC create ({{ aws_vpc_create.name }}) // Create ({{ aws_vpc_create.cidr }} @ {{ aws_vpc_create.region }})"
+  ec2_vpc_net:
+    profile: "{{ aws_vpc_create.profile }}"
+    name: "{{ aws_vpc_create.name }}"
+    cidr_block: "{{ aws_vpc_create.cidr }}"
+    region: "{{ aws_vpc_create.region }}"
+    tags: "{{ aws_vpc_create.tags }}"
+    dns_support: "{{ aws_vpc_create.dns.enable_support | default('yes') }}"
+    dns_hostnames: "{{ aws_vpc_create.dns.enable_hostnames | default('yes') }}"
+    purge_cidrs: "{{ aws_vpc_create.purge_cidrs | default('yes') }}"
+    multi_ok: "{{ aws_vpc_create.allow_duplicates | default('no') }}"
+    state: "present"
+  register: created_vpc
