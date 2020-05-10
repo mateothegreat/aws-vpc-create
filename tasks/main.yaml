@@ -4,5 +4,5 @@
 - import_tasks: "peering.yaml"
 - import_tasks: "peering_route_table_update.yaml"
 - import_tasks: "route_tables.yaml"
-#- import_tasks: "nat_gateway_elastic_ip.yaml"
-#- import_tasks: "nat_gateway.yaml"
+- import_tasks: "nat_gateway_elastic_ip.yaml"
+- import_tasks: "nat_gateway.yaml"
