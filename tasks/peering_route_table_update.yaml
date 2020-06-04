@@ -1,23 +1,10 @@
-- name: "Create peering connection"
-  ec2_vpc_peer:
-    profile: "{{ aws_vpc_create.profile }}"
-    region: "{{ item.region }}"
-    vpc_id: "{{ created_vpc.vpc.id }}"
-    peer_vpc_id: "{{ item.vpc_id }}"
-    state: "present"
-    tags: "{{ aws_vpc_create.tags | combine({ 'Name': item.name }) }}"
-  register: vpc_peers
-  loop: "{{ aws_vpc_create.peering }}"
-  when: aws_vpc_create.peering is defined
 
-- set_fact:
-    vpc_peering_connections: "{{ vpc_peers }}"
-
-- name: "Accept peering connection"
-  ec2_vpc_peer:
-    profile: "{{ aws_vpc_create.profile }}"
-    region: "{{ aws_vpc_create.region }}"
-    peering_id: "{{ item.peering_id }}"
-    state: "accept"
-  loop: "{{ vpc_peers.results }}"
-  when: aws_vpc_create.peering is defined
+- name: "Update default route table to include peer routes"
+  include_tasks: "route_table.yaml"
+  vars:
+    type: "private"
+    subnets: "{{ aws_vpc_create.subnets | selectattr('type', 'equalto', 'private') | list }}"
+    routes:
+      - dest: "{{ aws_vpc_create.cidr }}"
+        vpc_peering_connection_id: "{{ vpc_peers[0].peering_id }}"
+    route_table_id: "{{ aws_vpc_create.peering[0].route_table_id }}"

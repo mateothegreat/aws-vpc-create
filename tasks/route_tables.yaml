@@ -6,15 +6,6 @@
     routes:
       - dest: "0.0.0.0/0"
         gateway_id: "{{ internet_gateway.gateway_id }}"
-- debug: var=nat_gateway
-
-#- set_fact:
-#    private_routes:
-#      - dest: "0.0.0.0/0"
-#        gateway_id: "{{ nat_gateway.nat_gateway_id }}"
-#  when: aws_vpc_create.nat_gateway | bool
-
-- debug: var=vpc_peering_connections
 
 - set_fact:
     private_routes: "{{ (private_routes | default([])) + [{ 'dest': item.item.cidr, 'vpc_peering_connection_id': item.peering_id }] }}"

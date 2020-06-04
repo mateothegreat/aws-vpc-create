@@ -1,6 +1,6 @@
 aws_vpc_create:
   profile: "default"            # The aws credentials file profile name.
-  name: "test-1"                # Name of the vpc you want to create.
+  name: "test-2"                # Name of the vpc you want to create.
   region: "eu-central-1"        # AWS region.
   cidr: "201.0.0.0/16"          # CIDR for the entire vpc.
   internet_gateway: "true"      # Creates an internet gateway.
@@ -13,6 +13,7 @@ aws_vpc_create:
       vpc_id: "vpc-0504d01b93f46e610"
       region: "eu-central-1"
       cidr: "22.16.0.0/16"
+      route_table_id: "rtb-09a7410590099c08b"
       update_accepter_route_table: "true" # Add the route back to this vpc on the accepters route table.
   dns:
     enable_support: "true"      # Enable dns support for this vpc.
