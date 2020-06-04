@@ -1,10 +1,24 @@
 
-- name: "Update default route table to include peer routes"
-  include_tasks: "route_table.yaml"
-  vars:
-    type: "private"
-    subnets: "{{ aws_vpc_create.subnets | selectattr('type', 'equalto', 'private') | list }}"
-    routes:
-      - dest: "{{ aws_vpc_create.cidr }}"
-        vpc_peering_connection_id: "{{ vpc_peers[0].peering_id }}"
-    route_table_id: "{{ aws_vpc_create.peering[0].route_table_id }}"
+#- name: "Update default route table to include peer routes"
+#  ec2_vpc_route_table:
+#    profile: "{{ aws_vpc_create.profile }}"
+#    region: "{{ aws_vpc_create.region }}"
+#    vpc_id: "{{ created_vpc.vpc.id }}"
+#    route_table_id: "{{ aws_vpc_create.peering[0].route_table_id }}"
+#    routes:
+#      - dest: "{{ aws_vpc_create.cidr }}"
+#        gateway_id: "{{ vpc_peers.results[0].peering_id }}"
+#    state: "present"
+
+- name: "Create route on peer table"
+  command:
+    argv:
+      - "aws"
+      - "ec2"
+      - "create-route"
+      - "--route-table-id"
+      - "{{ aws_vpc_create.peering[0].route_table_id }}"
+      - "--vpc-peering-connection-id"
+      - "{{ vpc_peers.results[0].peering_id }}"
+      - "--destination-cidr-block"
+      - "{{ aws_vpc_create.cidr }}"

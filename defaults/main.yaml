@@ -2,7 +2,7 @@ aws_vpc_create:
   profile: "default"            # The aws credentials file profile name.
   name: "test-2"                # Name of the vpc you want to create.
   region: "eu-central-1"        # AWS region.
-  cidr: "201.0.0.0/16"          # CIDR for the entire vpc.
+  cidr: "202.0.0.0/16"          # CIDR for the entire vpc.
   internet_gateway: "true"      # Creates an internet gateway.
   nat_gateway: "true"           # Creates a nat gateway with elastic ip.
   allow_duplicate_name: "false" # Do not fail if a vpc with the same name already exists.
@@ -22,18 +22,18 @@ aws_vpc_create:
     - name: "public-1"
       type: "public"
       az: "eu-central-1a"
-      cidr: "201.0.1.0/24"
+      cidr: "202.0.1.0/24"
     - name: "public-2"
       type: "public"
-      cidr: "201.0.2.0/24"
+      cidr: "202.0.2.0/24"
       az: "eu-central-1b"
     - name: "private-1"
       type: "private"
-      cidr: "201.0.3.0/24"
+      cidr: "202.0.3.0/24"
       az: "eu-central-1a"
     - name: "private-2"
       type: "private"
-      cidr: "201.0.4.0/24"
+      cidr: "202.0.4.0/24"
       az: "eu-central-1b"
   tags:
     created_by: "Matthew Davis"
