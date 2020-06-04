@@ -1,3 +1,6 @@
+
+- debug: var=created_nat
+
 - name: "Create public route table"
   include_tasks: "route_table.yaml"
   vars:
@@ -8,7 +11,7 @@
         gateway_id: "{{ internet_gateway.gateway_id }}"
 
 - set_fact:
-    private_routes: "{{ (private_routes | default([])) + [{ 'dest': item.item.cidr, 'vpc_peering_connection_id': item.peering_id }] }}"
+    private_routes: "{{ (private_routes | default([])) + [{ 'dest': item.item.cidr, 'vpc_peering_connection_id': item.peering_id }] + [{ 'dest': '0.0.0.0/0', 'gateway_id': created_nat.nat_gateway_id }] }}"
     #  when: aws_vpc_create.nat_gateway | bool
   loop: "{{ vpc_peering_connections.results }}"
 
