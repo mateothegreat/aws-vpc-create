@@ -16,6 +16,8 @@
       - "aws"
       - "ec2"
       - "create-route"
+      - "--profile {{ aws_vpc_create.profile }}"
+      - "--region {{ aws_vpc_create.region }}"
       - "--route-table-id"
       - "{{ aws_vpc_create.peering[0].route_table_id }}"
       - "--vpc-peering-connection-id"
