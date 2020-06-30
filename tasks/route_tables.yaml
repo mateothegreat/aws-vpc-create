@@ -14,6 +14,13 @@
     private_routes: "{{ (private_routes | default([])) + [{ 'dest': item.item.cidr, 'vpc_peering_connection_id': item.peering_id }] + [{ 'dest': '0.0.0.0/0', 'gateway_id': created_nat.nat_gateway_id }] }}"
     #  when: aws_vpc_create.nat_gateway | bool
   loop: "{{ vpc_peering_connections.results }}"
+  when: aws_vpc_create.peering is defined and aws_vpc_create.peering | length > 0
+
+- set_fact:
+    private_routes: "{{ (private_routes | default([])) + [{ 'dest': '0.0.0.0/0', 'gateway_id': created_nat.nat_gateway_id }] }}"
+    #  when: aws_vpc_create.nat_gateway | bool
+  loop: "{{ vpc_peering_connections.results }}"
+  when: aws_vpc_create.peering is not defined
 
 - name: "Query for default (main) route table"
   ec2_vpc_route_table_info:
