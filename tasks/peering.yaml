@@ -8,7 +8,7 @@
     tags: "{{ aws_vpc_create.tags | combine({ 'Name': item.name }) }}"
   register: vpc_peers
   loop: "{{ aws_vpc_create.peering }}"
-  when: aws_vpc_create.peering is defined
+  when: aws_vpc_create.peering is defined and aws_vpc_create.peering | length > 0
 
 - set_fact:
     vpc_peering_connections: "{{ vpc_peers }}"
@@ -20,4 +20,4 @@
     peering_id: "{{ item.peering_id }}"
     state: "accept"
   loop: "{{ vpc_peers.results }}"
-  when: aws_vpc_create.peering is defined
+  when: aws_vpc_create.peering is defined and aws_vpc_create.peering | length > 0

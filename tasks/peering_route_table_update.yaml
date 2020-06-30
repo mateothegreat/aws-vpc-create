@@ -26,3 +26,4 @@
       - "{{ vpc_peers.results[0].peering_id }}"
       - "--destination-cidr-block"
       - "{{ aws_vpc_create.cidr }}"
+  when: aws_vpc_create.peering is defined and aws_vpc_create.peering | length > 0
